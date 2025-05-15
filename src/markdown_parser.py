@@ -1,3 +1,4 @@
+import re
 from textnode import TextType, TextNode
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
@@ -26,3 +27,11 @@ def remove_empty_nodes(nodes_list):
         if len(node.text) > 0:
             return_nodes.append(node)
     return return_nodes
+
+def extract_markdown_images(text):
+    matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    return matches
+
+def extract_markdown_links(text):
+    matches = re.findall(r"[^!]\[(.*?)\]\((.*?)\)", text)
+    return matches

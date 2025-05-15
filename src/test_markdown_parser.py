@@ -86,3 +86,24 @@ class TestMarkdownParser(unittest.TestCase):
     def test_no_closing_delimiter(self):
         test_node = TextNode("This text contains **No closing delimiter", TextType.TEXT)
         self.assertRaises(ValueError, split_nodes_delimiter, [test_node], "**", TextType.BOLD)
+
+    def test_extract_images(self):
+        expected_tuples = [('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')]
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        actual_tuples = extract_markdown_images(text)
+        self.assertEqual(expected_tuples, actual_tuples)
+
+    def test_extract_links(self):
+        expected_tuples = [('to boot dev', 'https://www.boot.dev'), ('to youtube', 'https://www.youtube.com/@bootdotdev')]
+        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        actual_tuples = extract_markdown_links(text)
+        self.assertEqual(expected_tuples, actual_tuples)
+
+    def test_extract_links_and_images(self):
+        expected_link_tuples = [('to boot dev', 'https://www.boot.dev')]
+        expected_image_tuples = [('rick roll', 'https://i.imgur.com/aKaOqIh.gif')]
+        text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and a link [to boot dev](https://www.boot.dev)"
+        actual_link_tuples = extract_markdown_links(text)
+        actual_image_tuples = extract_markdown_images(text)
+        self.assertEqual(expected_link_tuples, actual_link_tuples)
+        self.assertEqual(expected_image_tuples, actual_image_tuples)
