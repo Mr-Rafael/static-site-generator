@@ -107,3 +107,39 @@ class TestMarkdownParser(unittest.TestCase):
         actual_image_tuples = extract_markdown_images(text)
         self.assertEqual(expected_link_tuples, actual_link_tuples)
         self.assertEqual(expected_image_tuples, actual_image_tuples)
+    
+    def test_split_by_images(self):
+        expected_nodes = [TextNode("This is text with a ", TextType.TEXT),
+            TextNode("rick roll", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("obi wan", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg")
+        ]
+        test_node = TextNode("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)", TextType.TEXT)
+        split_text = split_nodes_image([test_node])
+        self.assertEqual(expected_nodes, split_text)
+    
+    def test_split_by_links(self):
+        expected_nodes = [TextNode("This is text with a link ", TextType.TEXT),
+            TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"),
+            TextNode(".", TextType.TEXT),
+        ]
+        test_node = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev).", TextType.TEXT)
+        split_text = split_nodes_link([test_node])
+        self.assertEqual(expected_nodes, split_text)
+    
+    def test_split_by_images_and_links(self):
+        expected_nodes = [TextNode("This is text with a ", TextType.TEXT),
+            TextNode("rick roll", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif"),
+            TextNode(", a link ", TextType.TEXT),
+            TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("obi wan", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(".", TextType.TEXT)
+        ]
+        full_text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif), a link [to boot dev](https://www.boot.dev) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)."
+        test_node = TextNode(full_text, TextType.TEXT)
+        split_text = split_nodes_link([test_node])
+        split_text = split_nodes_image(split_text)
+        self.assertEqual(expected_nodes, split_text)
