@@ -22,11 +22,18 @@ def split_single_node(old_node, delimiter, text_type):
     return remove_empty_nodes(new_nodes)
 
 def remove_empty_nodes(nodes_list):
-    return_nodes = []
+    result_nodes = []
     for node in nodes_list:
         if len(node.text) > 0:
-            return_nodes.append(node)
-    return return_nodes
+            result_nodes.append(node)
+    return result_nodes
+
+def remove_empty_strings(string_list):
+    result_strings = []
+    for stringe in string_list:
+        if len(stringe) > 0:
+            result_strings.append(stringe)
+    return result_strings
 
 def extract_markdown_images(text):
     matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
@@ -82,7 +89,7 @@ def split_single_node_by_links(old_node):
     new_nodes.append(TextNode(current_text, TextType.TEXT))
     return new_nodes
 
-def parse_markdown_text(text):
+def parse_inline_markdown_text(text):
     result_nodes = [TextNode(text, TextType.TEXT)]
     result_nodes = split_nodes_delimiter(result_nodes, "**", TextType.BOLD)
     result_nodes = split_nodes_delimiter(result_nodes, "_", TextType.ITALIC)
@@ -90,6 +97,11 @@ def parse_markdown_text(text):
     result_nodes = split_nodes_image(result_nodes)
     result_nodes = split_nodes_link(result_nodes)
     return result_nodes
+
+def markdown_to_blocks(markdown):
+    block_strings = markdown.split("\n\n")
+    block_strings = map(lambda x : x.strip(), block_strings)
+    return remove_empty_strings(block_strings)
 
 def get_nodes_string(text_nodes):
     return_string = ""
