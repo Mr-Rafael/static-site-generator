@@ -81,3 +81,21 @@ def split_single_node_by_links(old_node):
         current_text = split_text[1]
     new_nodes.append(TextNode(current_text, TextType.TEXT))
     return new_nodes
+
+def parse_markdown_text(text):
+    result_nodes = [TextNode(text, TextType.TEXT)]
+    result_nodes = split_nodes_delimiter(result_nodes, "**", TextType.BOLD)
+    result_nodes = split_nodes_delimiter(result_nodes, "_", TextType.ITALIC)
+    result_nodes = split_nodes_delimiter(result_nodes, "`", TextType.CODE)
+    result_nodes = split_nodes_image(result_nodes)
+    result_nodes = split_nodes_link(result_nodes)
+    return result_nodes
+
+def get_nodes_string(text_nodes):
+    return_string = ""
+    for text_node in text_nodes:
+        if text_node.text_type == TextType.IMAGE or text_node.text_type == TextType.LINK:
+            return_string += f"- {text_node.text_type.value}: |{text_node.text}| --> {text_node.url}\n"
+        else:
+            return_string += f"- {text_node.text_type.value}: |{text_node.text}|\n"
+    return return_string

@@ -143,3 +143,21 @@ class TestMarkdownParser(unittest.TestCase):
         split_text = split_nodes_link([test_node])
         split_text = split_nodes_image(split_text)
         self.assertEqual(expected_nodes, split_text)
+
+    def test_parse_markdown_text(self):
+        expected_nodes = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+        full_text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        result_nodes = parse_markdown_text(full_text)
+
+        self.assertEqual(expected_nodes, result_nodes)
