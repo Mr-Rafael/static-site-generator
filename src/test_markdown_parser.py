@@ -203,12 +203,12 @@ This is the same paragraph on a new line
         self.assertEqual(return_type, BlockType.PARAGRAPH)
 
     def test_block_to_block_quote(self):
-        test_heading = ">This is a quote block\n>Don't believe everything you read on the internet\n>-Woodrow Wilson"
+        test_heading = ">This is a quote block\n>Don't believe everything you read on the internet\n>-Ronald Reagan"
         return_type = block_to_block_type(test_heading)
         self.assertEqual(return_type, BlockType.QUOTE)
     
     def test_block_to_block_bad_quote(self):
-        test_heading = ">This is a quote block with syntax errors\n>Don't believe every quote\n-Woodrow Wilson"
+        test_heading = ">This is a quote block with syntax errors\n>Don't believe every quote\n-Ronal Reagan"
         return_type = block_to_block_type(test_heading)
         self.assertEqual(return_type, BlockType.PARAGRAPH)
 
@@ -231,3 +231,27 @@ This is the same paragraph on a new line
         test_heading = "1. This is an ordered list with bad numbering\n2. item 2\n4. item 3\n5. item 4"
         return_type = block_to_block_type(test_heading)
         self.assertEqual(return_type, BlockType.PARAGRAPH)
+
+    def test_parse_heading(self):
+        expected_html = "<h3>This is a heading</h3>"
+        test_markdown = "### This is a heading"
+        test_markdown_type = BlockType.HEADING
+        result_node = create_html_node(test_markdown, test_markdown_type)
+        result_html = result_node.to_html()
+        self.assertEqual(expected_html, result_html)
+
+    def test_parse_code(self):
+        expected_html = "<code>This is a code block\nbeep boop\n hello world.</code>"
+        test_markdown = "```This is a code block\nbeep boop\n hello world.```"
+        test_markdown_type = BlockType.CODE
+        result_node = create_html_node(test_markdown, test_markdown_type)
+        result_html = result_node.to_html()
+        self.assertEqual(expected_html, result_html)
+
+    def test_parse_quote(self):
+        expected_html = "<blockquote>This is a block quote\nDon't trust everything you read on the internet.\n - Calvin Coolidge.</blockquote>"
+        test_markdown = ">This is a block quote\n>Don't trust everything you read on the internet.\n> - Calvin Coolidge."
+        test_markdown_type = BlockType.QUOTE
+        result_node = create_html_node(test_markdown, test_markdown_type)
+        result_html = result_node.to_html()
+        self.assertEqual(expected_html, result_html)

@@ -1,5 +1,6 @@
 import re
 from textnode import TextType, TextNode
+from htmlnode import LeafNode, ParentNode
 from enum import Enum
 
 class BlockType(Enum):
@@ -142,6 +143,32 @@ def check_if_ordered_list(text):
         if int(results.group(1)) != i + 1:
             return False
     return True
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        html_node = create_html_node(markdown, block_type)
+
+def create_html_node(text, type):
+    match type:
+        case BlockType.HEADING:
+            heading_level = get_heading_level(text)
+            return LeafNode(tag=f"h{heading_level}", value=text[heading_level + 1:])
+        case BlockType.CODE:
+            return LeafNode(tag="code", value=text[3:-3])
+        case BlockType.QUOTE:
+            quote_text = get_quote_text(text)
+            return LeafNode(tag="blockquote", value=quote_text)
+
+def get_heading_level(markdown):
+    for i in range(0,6):
+        if markdown[i] != '#':
+            return i
+
+def get_quote_text(markdown):
+    lines = markdown[1:].split("\n>")
+    return "\n".join(lines)
 
 def get_nodes_string(text_nodes):
     return_string = ""
