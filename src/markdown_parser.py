@@ -1,5 +1,14 @@
 import re
 from textnode import TextType, TextNode
+from enum import Enum
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
@@ -102,6 +111,37 @@ def markdown_to_blocks(markdown):
     block_strings = markdown.split("\n\n")
     block_strings = map(lambda x : x.strip(), block_strings)
     return remove_empty_strings(block_strings)
+
+def block_to_block_type(markdown):
+    if re.search('^#{1,6} .*', markdown):
+        return BlockType.HEADING
+    if re.search('^```([^`])*```$', markdown):
+        return BlockType.CODE
+    if check_every_line_starts_with(markdown, '>'):
+        return BlockType.QUOTE
+    if check_every_line_starts_with(markdown, '-'):
+        return BlockType.UNORDERED_LIST
+    if check_if_ordered_list(markdown):
+        return BlockType.ORDERED_LIST
+    else:
+        return BlockType.PARAGRAPH
+
+def check_every_line_starts_with(text, character):
+    text_lines = text.split("\n")
+    for line in text_lines:
+        if line[0] != character:
+            return False
+    return True
+
+def check_if_ordered_list(text):
+    text_lines = text.split("\n")
+    for i in range(0, len(text_lines)):
+        results = re.search(r"(\d+).*", text_lines[i])
+        if results is None:
+            return False
+        if int(results.group(1)) != i + 1:
+            return False
+    return True
 
 def get_nodes_string(text_nodes):
     return_string = ""

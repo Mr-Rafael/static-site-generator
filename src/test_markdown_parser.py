@@ -181,3 +181,53 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
+    
+    def test_block_to_block_heading(self):
+        test_heading = "### This is a heading"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.HEADING)
+    
+    def test_block_to_block_bad_heading(self):
+        test_heading = "#This is a bad heading"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_code(self):
+        test_heading = "```This is a code block.\nbeep boop\nhello world```"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.CODE)
+    
+    def test_block_to_block_bad_heading(self):
+        test_heading = "```This is a code block with syntax errors\nbeep boop i'm dying\ngoodbye world"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_quote(self):
+        test_heading = ">This is a quote block\n>Don't believe everything you read on the internet\n>-Woodrow Wilson"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.QUOTE)
+    
+    def test_block_to_block_bad_quote(self):
+        test_heading = ">This is a quote block with syntax errors\n>Don't believe every quote\n-Woodrow Wilson"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_unordered_list(self):
+        test_heading = "-This is an unordered list\n-item a\n- item b\n- item c"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.UNORDERED_LIST)
+    
+    def test_block_to_block_bad_unordered_list(self):
+        test_heading = "-This is an unordered list with syntax errors\n-item a\n - item b\n- item c"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_ordered_list(self):
+        test_heading = "1. This is an ordered list\n2. item 2\n3. item 3\n4. item 4"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.ORDERED_LIST)
+    
+    def test_block_to_block_bad_ordered_list(self):
+        test_heading = "1. This is an ordered list with bad numbering\n2. item 2\n4. item 3\n5. item 4"
+        return_type = block_to_block_type(test_heading)
+        self.assertEqual(return_type, BlockType.PARAGRAPH)
