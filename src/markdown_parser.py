@@ -116,7 +116,7 @@ def markdown_to_blocks(markdown):
 def block_to_block_type(markdown):
     if re.search('^#{1,6} .*', markdown):
         return BlockType.HEADING
-    if re.search('^```([^`])*```$', markdown):
+    if re.search('^```\n([^`])*\n```$', markdown):
         return BlockType.CODE
     if check_every_line_starts_with(markdown, '>'):
         return BlockType.QUOTE
@@ -146,9 +146,12 @@ def check_if_ordered_list(text):
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
+    return_nodes = []
     for block in blocks:
         block_type = block_to_block_type(block)
-        html_node = create_html_node(markdown, block_type)
+        html_node = create_html_node(block, block_type)
+        return_nodes.append(html_node)
+    return ParentNode(tag="div", children=return_nodes)
 
 def create_html_node(text, type):
     match type:
@@ -156,10 +159,25 @@ def create_html_node(text, type):
             heading_level = get_heading_level(text)
             return LeafNode(tag=f"h{heading_level}", value=text[heading_level + 1:])
         case BlockType.CODE:
-            return LeafNode(tag="code", value=text[3:-3])
+            child_node = LeafNode(tag="code", value=text[4:-3])
+            return ParentNode(tag="pre", children=[child_node])
         case BlockType.QUOTE:
             quote_text = get_quote_text(text)
             return LeafNode(tag="blockquote", value=quote_text)
+        case BlockType.UNORDERED_LIST:
+            line_nodes = get_unordered_list_leaves(text)
+            return ParentNode(tag="ul", children=line_nodes)
+        case BlockType.ORDERED_LIST:
+            line_nodes = get_ordered_list_leaves(text)
+            return ParentNode(tag="ol", children=line_nodes)
+        case BlockType.PARAGRAPH:
+            paragraph = parse_paragraph(text)
+            return paragraph
+
+def parse_paragraph(text):
+    text_nodes = parse_inline_markdown_text(text)
+    html_nodes = list(map(lambda x: TextNode.textnode_to_html_node(x), text_nodes))
+    return ParentNode(tag="p", children=html_nodes)
 
 def get_heading_level(markdown):
     for i in range(0,6):
@@ -169,6 +187,16 @@ def get_heading_level(markdown):
 def get_quote_text(markdown):
     lines = markdown[1:].split("\n>")
     return "\n".join(lines)
+
+def get_unordered_list_leaves(markdown):
+    lines = markdown[1:].split("\n-")
+    line_nodes = list(map(lambda x: LeafNode(tag="li", value=x), lines))
+    return line_nodes
+
+def get_ordered_list_leaves(markdown):
+    lines = remove_empty_strings(re.split(r"\n*\d+.", markdown))
+    line_nodes = list(map(lambda x: LeafNode(tag="li", value=x), lines))
+    return line_nodes
 
 def get_nodes_string(text_nodes):
     return_string = ""

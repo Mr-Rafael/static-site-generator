@@ -193,7 +193,7 @@ This is the same paragraph on a new line
         self.assertEqual(return_type, BlockType.PARAGRAPH)
 
     def test_block_to_block_code(self):
-        test_heading = "```This is a code block.\nbeep boop\nhello world```"
+        test_heading = "```\nThis is a code block.\nbeep boop\nhello world\n```"
         return_type = block_to_block_type(test_heading)
         self.assertEqual(return_type, BlockType.CODE)
     
@@ -241,8 +241,8 @@ This is the same paragraph on a new line
         self.assertEqual(expected_html, result_html)
 
     def test_parse_code(self):
-        expected_html = "<code>This is a code block\nbeep boop\n hello world.</code>"
-        test_markdown = "```This is a code block\nbeep boop\n hello world.```"
+        expected_html = "<pre><code>This is a code block\nbeep boop\n hello world.\n</code></pre>"
+        test_markdown = "```\nThis is a code block\nbeep boop\n hello world.\n```"
         test_markdown_type = BlockType.CODE
         result_node = create_html_node(test_markdown, test_markdown_type)
         result_html = result_node.to_html()
@@ -255,3 +255,50 @@ This is the same paragraph on a new line
         result_node = create_html_node(test_markdown, test_markdown_type)
         result_html = result_node.to_html()
         self.assertEqual(expected_html, result_html)
+
+    def test_parse_unordered_list(self):
+        expected_html = "<ul><li>This is an unordered list</li><li>Robots have seen things you people wouldn’t believe.</li><li>Robots are Your Plastic Pal Who’s Fun To Be With.</li></ul>"
+        test_markdown = "-This is an unordered list\n-Robots have seen things you people wouldn’t believe.\n-Robots are Your Plastic Pal Who’s Fun To Be With."
+        test_markdown_type = BlockType.UNORDERED_LIST
+        result_node = create_html_node(test_markdown, test_markdown_type)
+        result_html = result_node.to_html()
+        self.assertEqual(expected_html, result_html)
+
+    def test_parse_unordered_list(self):
+        expected_html = "<ol><li>This is an ordered list</li><li>Robots have shiny metal posteriors which should not be bitten.</li><li>And they have a plan.</li></ol>"
+        test_markdown = "1.This is an ordered list\n2.Robots have shiny metal posteriors which should not be bitten.\n3.And they have a plan."
+        test_markdown_type = BlockType.ORDERED_LIST
+        result_node = create_html_node(test_markdown, test_markdown_type)
+        result_html = result_node.to_html()
+        self.assertEqual(expected_html, result_html)
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )

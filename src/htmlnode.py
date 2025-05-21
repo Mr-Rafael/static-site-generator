@@ -32,7 +32,7 @@ class HTMLNode:
     
     def get_children_string(self):
         if self.children is not None:
-            children_strings = map(lambda x: f"--> {x}", self.children)
+            children_strings = map(lambda x: f"--> |{x}|", self.children)
             full_string = ",\n".join(children_strings)
             return f"children: [\n{full_string}\n]"
         else:

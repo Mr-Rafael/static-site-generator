@@ -25,7 +25,8 @@ class TextNode():
     def textnode_to_html_node(text_node):
         match text_node.text_type:
             case TextType.TEXT:
-                return LeafNode(value=text_node.text)
+                text_without_newlines = text_node.text.replace("\n", " ")
+                return LeafNode(value=text_without_newlines)
             case TextType.BOLD:
                 return LeafNode(tag="b", value=text_node.text)
             case TextType.ITALIC:
