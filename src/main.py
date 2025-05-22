@@ -6,12 +6,12 @@ from markdown_parser import *
 
 def main():
     copy_source_contents()
-    basepath = get_base_path
+    basepath = get_base_path()
     generate_pages_recursive("content", "template.html", "docs", basepath)
 
 def get_base_path():
     if len(sys.argv) > 0:
-        return sys.argv[0]
+        return sys.argv[1]
     return "/"
 
 def copy_source_contents():
@@ -48,8 +48,8 @@ def generate_page(from_path, template_path, dest_path, base_path):
     title_string = extract_title(markdown_content)
     template_content = template_content.replace(f"{{{{ Title }}}}", title_string)
     template_content = template_content.replace(f"{{{{ Content }}}}", html_string)
-    template_content = template_content.replace("href=\"/", f"href\"={base_path}")
-    template_content = template_content.replace("src=\"/", f"src\"={base_path}")
+    template_content = template_content.replace("href=\"/", f"href=\"{base_path}")
+    template_content = template_content.replace("src=\"/", f"src=\"{base_path}")
     create_directory_if_nonexistent(dest_path)
     with(open(dest_path, 'w') as html_file):
         html_file.write(template_content)
