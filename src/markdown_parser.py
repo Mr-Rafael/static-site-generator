@@ -50,7 +50,7 @@ def extract_markdown_images(text):
     return matches
 
 def extract_markdown_links(text):
-    matches = re.findall(r"[^!]\[(.*?)\]\((.*?)\)", text)
+    matches = re.findall(r"(?:^|[^!])\[(.*?)\]\((.*?)\)", text)
     return matches
 
 def split_nodes_image(old_nodes):
@@ -100,12 +100,14 @@ def split_single_node_by_links(old_node):
     return new_nodes
 
 def parse_inline_markdown_text(text):
+
     result_nodes = [TextNode(text, TextType.TEXT)]
     result_nodes = split_nodes_delimiter(result_nodes, "**", TextType.BOLD)
     result_nodes = split_nodes_delimiter(result_nodes, "_", TextType.ITALIC)
     result_nodes = split_nodes_delimiter(result_nodes, "`", TextType.CODE)
     result_nodes = split_nodes_image(result_nodes)
     result_nodes = split_nodes_link(result_nodes)
+
     return result_nodes
 
 def markdown_to_blocks(markdown):
@@ -185,18 +187,33 @@ def get_heading_level(markdown):
             return i
 
 def get_quote_text(markdown):
-    lines = markdown[1:].split("\n>")
+    lines = markdown[2:].split("\n>")
     return "\n".join(lines)
 
 def get_unordered_list_leaves(markdown):
-    lines = markdown[1:].split("\n-")
-    line_nodes = list(map(lambda x: LeafNode(tag="li", value=x), lines))
-    return line_nodes
+    lines = markdown[2:].split("\n- ")
+    unordered_list_nodes = []
+    for line in lines:
+        unordered_list_nodes.append(get_list_element(line))
+    return unordered_list_nodes
 
 def get_ordered_list_leaves(markdown):
-    lines = remove_empty_strings(re.split(r"\n*\d+.", markdown))
-    line_nodes = list(map(lambda x: LeafNode(tag="li", value=x), lines))
-    return line_nodes
+    lines = remove_empty_strings(re.split(r"\n*\d+. ", markdown))
+    ordered_list_nodes = []
+    for line in lines:
+        ordered_list_nodes.append(get_list_element(line))
+    return ordered_list_nodes
+
+def get_list_element(text):
+    text_nodes = parse_inline_markdown_text(text)
+    html_nodes = list(map(lambda x: TextNode.textnode_to_html_node(x), text_nodes))
+    return ParentNode(tag="li", children=html_nodes)
+
+def extract_title(markdown):
+    title_match = re.findall(r"^#\s*(.*)\n", markdown)
+    if len(title_match) < 1:
+        raise ValueError("The file submitted does not have a title.")
+    return title_match[0].strip()
 
 def get_nodes_string(text_nodes):
     return_string = ""

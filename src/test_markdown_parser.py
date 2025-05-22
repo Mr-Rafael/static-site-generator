@@ -302,3 +302,15 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+    def test_extract_title_without_whitespace(self):
+        test_markdown = "#THIS IS THE TITLE\nand now some content\n\nand some more content"
+        expected_title = "THIS IS THE TITLE"
+        actual_title = extract_title(test_markdown)
+        self.assertEqual(expected_title, actual_title)
+
+    def test_extract_title(self):
+        test_markdown = "#   THIS IS THE TITLE\nand now some content\n\nand some more content"
+        expected_title = "THIS IS THE TITLE"
+        actual_title = extract_title(test_markdown)
+        self.assertEqual(expected_title, actual_title)
