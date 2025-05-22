@@ -10,7 +10,7 @@ def main():
     generate_pages_recursive("content", "template.html", "docs", basepath)
 
 def get_base_path():
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         return sys.argv[1]
     return "/"
 
