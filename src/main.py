@@ -5,7 +5,7 @@ from markdown_parser import *
 
 def main():
     copy_source_contents()
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 def copy_source_contents():
     source_directory = "static"
@@ -18,7 +18,7 @@ def clear_destination_directory(directory):
         shutil.rmtree(directory)
         os.mkdir(directory, mode=0o777)
     else:
-        os.mkdir(destination_directory, mode=0o777)
+        os.mkdir(directory, mode=0o777)
 
 def copy_contents(source_directory, destination_directory):
     paths_list = os.listdir(source_directory)
@@ -45,6 +45,23 @@ def generate_page(from_path, template_path, dest_path):
     with(open(dest_path, 'w') as html_file):
         html_file.write(template_content)
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    found_html_paths = find_html_files(dir_path_content)
+    for html_file_path in found_html_paths:
+        destination_file_path = html_file_path.replace(dir_path_content, dest_dir_path).replace(".md", ".html")
+        generate_page(html_file_path, template_path, destination_file_path)
+
+def find_html_files(start_directory):
+    paths_list = os.listdir(start_directory)
+    html_paths = []
+    for path in paths_list:
+        full_path = os.path.join(start_directory, path)
+        if os.path.isfile(full_path) and full_path.endswith(".md"):
+            html_paths.append(full_path)
+        elif os.path.isdir(full_path):
+            html_paths.extend(find_html_files(full_path))
+    return html_paths
+
 def create_directory_if_nonexistent(path):
     split_path = path.split("/")
     if len(split_path) > 1:
@@ -53,8 +70,9 @@ def create_directory_if_nonexistent(path):
         return
     current_path = ""
     for section in split_path:
-        if not os.path.isdir(section):
-            os.mkdir(section)
-        current_path = f"{section}/"
+        current_path = f"{current_path}{section}"
+        if not os.path.isdir(current_path):
+            os.mkdir(current_path, mode=0o777)
+        current_path = f"{current_path}/"
 
 main()
